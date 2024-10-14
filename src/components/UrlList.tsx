@@ -52,6 +52,7 @@ const UrlList: React.FC = () => {
                 variant="contained"
                 color="primary"
                 onClick={() => handleEditClick(id, url)}
+                sx={{ ml: 1 }}
               >
                 Edit
               </Button>

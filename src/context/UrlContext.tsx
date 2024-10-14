@@ -1,3 +1,4 @@
+import { Alert, Snackbar } from "@mui/material";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 import { deleteUrl, getUrls, saveUrl } from "../services/urlService";
 
@@ -15,29 +16,67 @@ export const UrlContext = createContext<UrlContextType | undefined>(undefined);
 
 export const UrlProvider: React.FC<UrlProviderProps> = ({ children }) => {
   const [urls, setUrls] = useState<{ id: string; url: string }[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
+  const [severity, setSeverity] = useState<
+    "success" | "error" | "info" | "warning"
+  >("info");
 
   useEffect(() => {
     const fetchUrls = async () => {
-      const data = await getUrls();
-      setUrls(data);
+      try {
+        const data = await getUrls();
+        setUrls(data);
+        setMessage("URLs loaded successfully");
+        setSeverity("success");
+      } catch (error) {
+        setMessage("Error loading URLs");
+        setSeverity("error");
+      }
     };
 
     fetchUrls();
   }, []);
 
   const addUrl = async (url: string) => {
-    const newUrl = await saveUrl(url);
-    setUrls([...urls, newUrl]);
+    try {
+      const newUrl = await saveUrl(url);
+      setUrls([...urls, newUrl]);
+      setMessage("URL added successfully");
+      setSeverity("success");
+    } catch (error) {
+      setMessage("Error adding URL");
+      setSeverity("error");
+    }
   };
 
   const removeUrl = async (id: string) => {
-    await deleteUrl(id);
-    setUrls(urls.filter((u) => u.id !== id));
+    try {
+      await deleteUrl(id);
+      setUrls(urls.filter((u) => u.id !== id));
+      setMessage("URL deleted successfully");
+      setSeverity("success");
+    } catch (error) {
+      setMessage("Error deleting URL");
+      setSeverity("error");
+    }
+  };
+
+  const clearMessage = () => {
+    setMessage(null);
   };
 
   return (
     <UrlContext.Provider value={{ urls, addUrl, removeUrl }}>
       {children}
+      <Snackbar open={!!message} autoHideDuration={6000} onClose={clearMessage}>
+        <Alert
+          onClose={clearMessage}
+          severity={severity}
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
     </UrlContext.Provider>
   );
 };

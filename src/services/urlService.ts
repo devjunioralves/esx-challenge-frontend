@@ -16,3 +16,8 @@ export const deleteUrl = async (id: string) => {
   const response = await axios.delete(`${API_URL}${id}`);
   return response.data;
 };
+
+export const updateUrl = async (id: string, url: string) => {
+  const response = await axios.put(`${API_URL}${id}`, { url });
+  return response.data;
+};

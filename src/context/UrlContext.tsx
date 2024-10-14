@@ -1,11 +1,12 @@
 import { Alert, Snackbar } from "@mui/material";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
-import { deleteUrl, getUrls, saveUrl } from "../services/urlService";
+import { deleteUrl, getUrls, saveUrl, updateUrl } from "../services/urlService";
 
 interface UrlContextType {
   urls: { id: string; url: string }[];
   addUrl: (url: string) => Promise<void>;
   removeUrl: (id: string) => Promise<void>;
+  editUrl: (id: string, url: string) => Promise<void>;
 }
 
 interface UrlProviderProps {
@@ -61,12 +62,24 @@ export const UrlProvider: React.FC<UrlProviderProps> = ({ children }) => {
     }
   };
 
+  const editUrl = async (id: string, url: string) => {
+    try {
+      const updatedUrl = await updateUrl(id, url);
+      setUrls(urls.map((u) => (u.id === id ? updatedUrl : u)));
+      setMessage("URL updated successfully");
+      setSeverity("success");
+    } catch (error) {
+      setMessage("Error updating URL");
+      setSeverity("error");
+    }
+  };
+
   const clearMessage = () => {
     setMessage(null);
   };
 
   return (
-    <UrlContext.Provider value={{ urls, addUrl, removeUrl }}>
+    <UrlContext.Provider value={{ urls, addUrl, removeUrl, editUrl }}>
       {children}
       <Snackbar open={!!message} autoHideDuration={6000} onClose={clearMessage}>
         <Alert
